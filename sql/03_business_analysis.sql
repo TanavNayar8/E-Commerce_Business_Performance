@@ -97,3 +97,89 @@ FROM OrderTotals
 WHERE max_installments >= 1
 GROUP BY max_installments
 ORDER BY max_installments;
+
+
+/* ============================================================================
+   2. PRODUCT & CATEGORY ANALYTICS
+   ============================================================================ */
+
+-- Q5: Top 10 Categories by Merchandise Value
+-- Business Question: Which product categories generate the highest merchandise value?
+-- Business Value: Dictates marketing spend, inventory strategy, and seller acquisition targeting for key verticals.
+SELECT 
+    p.product_category_name_english AS category,
+    COUNT(i.order_item_id) AS total_items_sold,
+    ROUND(SUM(i.price), 2) AS total_merchandise_value
+FROM order_items i
+JOIN products p ON i.product_id = p.product_id
+JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = 'delivered'
+  AND p.product_category_name_english IS NOT NULL
+GROUP BY p.product_category_name_english
+ORDER BY total_merchandise_value DESC
+LIMIT 10;
+
+
+-- Q6: Categories with the Highest Freight-to-Merchandise Ratio
+-- Business Question: Which categories are the most inefficient to ship relative to their item value?
+-- Business Value: High shipping costs relative to item price cause cart abandonment. Identifies categories needing logistics optimization.
+SELECT 
+    p.product_category_name_english AS category,
+    COUNT(i.order_item_id) AS items_sold,
+    ROUND(AVG(i.price), 2) AS avg_item_value,
+    ROUND(AVG(i.freight_value), 2) AS avg_freight_cost,
+    -- NULLIF prevents division-by-zero errors if average price evaluates to 0
+    ROUND(AVG(i.freight_value) / NULLIF(AVG(i.price), 0) * 100, 2) AS freight_to_item_ratio_pct
+FROM order_items i
+JOIN products p ON i.product_id = p.product_id
+JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = 'delivered'
+  AND p.product_category_name_english IS NOT NULL
+GROUP BY p.product_category_name_english
+HAVING COUNT(i.order_item_id) > 500
+ORDER BY freight_to_item_ratio_pct DESC
+LIMIT 10;
+
+
+-- Q7: Top 3 Products within the Top 5 Categories (Top-N within Groups)
+-- Business Question: What are the top 3 best-selling specific products within our 5 largest categories?
+-- Business Value: Operational focus on hero SKUs within key verticals for inventory and promotion management.
+WITH CategoryRank AS (
+    -- Find the top 5 categories globally
+    SELECT 
+        p.product_category_name_english,
+        SUM(i.price) as cat_merchandise_value,
+        DENSE_RANK() OVER(ORDER BY SUM(i.price) DESC) as cat_rank
+    FROM order_items i
+    JOIN products p ON i.product_id = p.product_id
+    JOIN orders o ON i.order_id = o.order_id
+    WHERE o.order_status = 'delivered'
+      AND p.product_category_name_english IS NOT NULL
+    GROUP BY p.product_category_name_english
+),
+ProductRank AS (
+    -- Rank products 1 through N *within* each of those top 5 categories
+    SELECT 
+        p.product_category_name_english,
+        i.product_id,
+        SUM(i.price) as product_merchandise_value,
+        ROW_NUMBER() OVER(PARTITION BY p.product_category_name_english ORDER BY SUM(i.price) DESC) as prod_rank
+    FROM order_items i
+    JOIN products p ON i.product_id = p.product_id
+    JOIN orders o ON i.order_id = o.order_id
+    JOIN CategoryRank cr ON p.product_category_name_english = cr.product_category_name_english
+    WHERE o.order_status = 'delivered' 
+      AND cr.cat_rank <= 5
+    GROUP BY p.product_category_name_english, i.product_id
+)
+SELECT 
+    product_category_name_english,
+    product_id,
+    product_merchandise_value,
+    prod_rank
+FROM ProductRank
+WHERE prod_rank <= 3
+ORDER BY product_category_name_english, prod_rank;
+
+
+
