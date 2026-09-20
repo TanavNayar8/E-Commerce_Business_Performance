@@ -1,4 +1,4 @@
--- Check 1: Did all rows import? (Compare these numbers to your Python output)
+-- Check 1: Did all rows import? 
 
 SELECT 'Orders' as table_name, COUNT(*) as row_count FROM orders
 UNION ALL
