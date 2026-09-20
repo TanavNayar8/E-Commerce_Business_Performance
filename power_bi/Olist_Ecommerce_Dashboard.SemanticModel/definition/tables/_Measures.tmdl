@@ -1,0 +1,281 @@
+table _Measures
+	lineageTag: cb34f267-c3c0-46d6-8afb-d60838939a72
+
+	measure 'Total Cash Collected' = SUM(fact_payments[payment_value])
+		formatString: #,##0
+		displayFolder: _Core KPIs
+		lineageTag: 3f1d4cf1-9170-4471-9878-0ada2522e0fe
+
+	measure 'Total Merchandise Value' = SUM(fact_order_items[price])
+		formatString: #,##0
+		displayFolder: _Core KPIs
+		lineageTag: 57058f5e-a035-47a1-8863-dd0e796a0731
+
+	measure 'Items Sold' = COUNTROWS(fact_order_items)
+		formatString: 0
+		lineageTag: 36eff06b-b1df-456a-9cb7-b037a2b88e00
+
+	measure 'Active Sellers' = DISTINCTCOUNT(fact_order_items[seller_id])
+		formatString: 0
+		displayFolder: _Core KPIs
+		lineageTag: 5d757585-7d67-4b59-b202-52ed8aba58cc
+
+	measure 'Average Review Score' = AVERAGE(fact_reviews[review_score])
+		formatString: 0.00
+		displayFolder: _operations
+		lineageTag: a2c3b202-fc5c-4b40-aee5-b3694205b604
+
+	measure 'Total Unique Customers' = DISTINCTCOUNT(dim_customers[customer_unique_id])
+		formatString: 0
+		displayFolder: _Core KPIs
+		lineageTag: d825bce7-9d91-4555-ae30-bae4f40bf087
+
+	measure 'Total Valid Orders' =
+			
+			CALCULATE(
+			    COUNTROWS(fact_orders),
+			    fact_orders[order_status] <> "canceled",
+			    fact_orders[order_status] <> "unavailable"
+			)
+		formatString: 0
+		displayFolder: _Core KPIs
+		lineageTag: c83f6755-aad2-4127-a87b-a5524f8fc2a0
+
+	measure AOV = DIVIDE([Total Cash Collected], [Total Valid Orders], 0)
+		formatString: #,##0.00
+		displayFolder: _Core KPIs
+		lineageTag: 57bf263f-7522-4a1a-bf84-9a82bd9d46e0
+
+	measure 'Repeat Customer Rate' = ```
+			
+			VAR CustomersWithMultipleOrders = 
+			    FILTER(
+			        VALUES(dim_customers[customer_unique_id]),
+			        [Total Valid Orders] > 1
+			    )
+			VAR CountRepeatCustomers = COUNTROWS(CustomersWithMultipleOrders)
+			RETURN
+			    DIVIDE(CountRepeatCustomers, [Total Unique Customers], 0)
+			```
+		formatString: 0.0%
+		displayFolder: _customer
+		lineageTag: 4068014d-272b-4c21-a320-0d627e5dab2b
+
+	measure 'Late Delivery Rate' = ```
+			
+			VAR LateDeliveredOrders = 
+			    CALCULATE(
+			        [Delivered Orders],
+			        fact_orders[order_delivered_customer_date] > fact_orders[order_estimated_delivery_date]
+			    )
+			RETURN
+			    DIVIDE(LateDeliveredOrders, [Delivered Orders], 0)
+			```
+		formatString: 0.0%
+		displayFolder: _operations
+		lineageTag: 2af43b88-5d09-4411-9d75-cb83dc32b651
+
+	measure 'Cash Collected (Prev Month)' =
+			
+			CALCULATE(
+			    [Total Cash Collected],
+			    PREVIOUSMONTH('Dim_Date'[Date])
+			)
+		displayFolder: _Time Intelligence
+		lineageTag: e821b58b-5564-48da-91ef-e018e71a3619
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'MoM Cash Growth %' =
+			
+			DIVIDE(
+			    [Total Cash Collected] - [Cash Collected (Prev Month)],
+			    [Cash Collected (Prev Month)],
+			    BLANK()
+			)
+		formatString: 0.0%;-0.0%;
+		displayFolder: _Time Intelligence
+		lineageTag: 6f6f53e7-fcf3-48cc-ab01-0f737ab600dc
+
+	measure 'Cash per Customer' =
+			
+			DIVIDE([Total Cash Collected], [Total Unique Customers], 0)
+		formatString: #,##0.00
+		displayFolder: _customer
+		lineageTag: 0778127c-18eb-478e-be85-ba8cbd1da57d
+
+	measure 'Average Delivery Days' = ```
+			
+			AVERAGEX(
+			    FILTER(
+			        fact_orders,
+			        fact_orders[order_status] = "delivered" && 
+			        NOT ISBLANK(fact_orders[order_delivered_customer_date]) && 
+			        fact_orders[order_delivered_customer_date] > fact_orders[order_purchase_timestamp]
+			    ),
+			    DATEDIFF(fact_orders[order_purchase_timestamp], fact_orders[order_delivered_customer_date], DAY)
+			)
+			```
+		formatString: 0.0
+		displayFolder: _operations
+		lineageTag: 24c7cbde-1db4-4743-b94a-effe130b1e31
+
+	measure 'Cash Collected (Prev Year)' =
+			
+			CALCULATE(
+			    [Total Cash Collected],
+			    SAMEPERIODLASTYEAR('Dim_Date'[Date])
+			)
+		displayFolder: _Time Intelligence
+		lineageTag: e05d796b-4b9b-4bad-98dd-4e702fcd96fd
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'YoY Cash Growth %' =
+			
+			DIVIDE(
+			    [Total Cash Collected] - [Cash Collected (Prev Year)],
+			    [Cash Collected (Prev Year)],
+			    0
+			)
+		displayFolder: _Time Intelligence
+		lineageTag: d41cdbc5-d0d6-4596-adfd-aeb0c3828f70
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Cumulative Cash Collected' =
+			
+			// Removes filters on the Date table and sums everything up to the current visual date
+			CALCULATE(
+			    [Total Cash Collected],
+			    FILTER(
+			        ALL('Dim_Date'),
+			        'Dim_Date'[Date] <= MAX('Dim_Date'[Date])
+			    )
+			)
+		lineageTag: 71f3f38f-b2e8-4840-b5cd-f08de942d977
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '% of Total Cash Collected' =
+			
+			DIVIDE(
+			    [Total Cash Collected],
+			    CALCULATE([Total Cash Collected], ALLSELECTED())
+			)
+		displayFolder: _Ranking and Contribution
+		lineageTag: 3e5805eb-11a1-4680-a8a5-5fc14e3424d8
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '% of Total Merchandise Value' =
+			
+			DIVIDE(
+			    [Total Merchandise Value],
+			    CALCULATE([Total Merchandise Value], ALLSELECTED())
+			)
+		formatString: 0.0%
+		displayFolder: _Time Intelligence
+		lineageTag: e6ad5da3-beb0-4131-bd78-2abd3c175eea
+
+	measure 'Seller Rank by Merchandise Value' = ```
+			
+			// The IF(ISBLANK) prevents Power BI from ranking sellers who sold nothing in the filtered period.
+			IF(
+			    ISBLANK([Total Merchandise Value]), 
+			    BLANK(),
+			    RANKX(
+			        ALLSELECTED(dim_sellers[seller_id]), 
+			        [Total Merchandise Value], 
+			        , 
+			        DESC, 
+			        Dense
+			    )
+			)
+			```
+		formatString: 0
+		displayFolder: _Ranking and Contribution
+		lineageTag: 755116fa-63b1-41e0-89ea-2d337593ff0a
+
+	measure 'Category Rank by Merchandise Value' = ```
+			
+			IF(
+			    ISBLANK([Total Merchandise Value]), 
+			    BLANK(),
+			    RANKX(
+			        ALLSELECTED(dim_Products[product_category_name_english]), 
+			        [Total Merchandise Value], 
+			        , 
+			        DESC, 
+			        Dense
+			    )
+			)
+			```
+		formatString: 0
+		displayFolder: _Ranking and Contribution
+		lineageTag: f56a2887-d72e-49b3-928f-c0a6557261b0
+
+	measure 'Delivered Orders' =
+			
+			CALCULATE(
+			    COUNTROWS(fact_orders),
+			    fact_orders[order_status] = "delivered"
+			)
+		formatString: 0
+		lineageTag: d56dc976-018b-4b94-b2b1-dbdb07f437b3
+
+	measure 'Freight Burden Ratio' =
+			
+			DIVIDE(
+			    SUM(fact_order_items[freight_value]),
+			    SUM(fact_order_items[price]),
+			    0
+			)
+		formatString: 0.0%
+		displayFolder: _operations
+		lineageTag: 1beeb967-4031-4cfd-bdeb-49d6081fa0bd
+
+	measure 'Seller Average Review Score' =
+			
+			CALCULATE(
+			    [Average Review Score],
+			    CROSSFILTER(fact_order_items[order_id], fact_orders[order_id], Both)
+			)
+		formatString: 0.00
+		displayFolder: _operations
+		lineageTag: ddea3331-7fa5-4a5a-a51f-ecab0e6da356
+
+	measure 'Late Delivered Orders' =
+			
+			CALCULATE(
+			    [Delivered Orders],
+			    fact_orders[order_delivered_customer_date] > fact_orders[order_estimated_delivery_date]
+			)
+		formatString: 0
+		displayFolder: _operations
+		lineageTag: 9c4e2a71-6b8d-4f03-a1e5-2d7c8b90f4a6
+
+	measure 'Seller Late Delivered Orders' =
+			
+			CALCULATE(
+			    [Late Delivered Orders],
+			    CROSSFILTER(fact_order_items[order_id], fact_orders[order_id], Both)
+			)
+		formatString: 0
+		displayFolder: _operations
+		lineageTag: ca199feb-4f6c-4b14-8fcf-2294c0fe5dc4
+
+	partition _Measures = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i44FAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Column1 = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Column1", type text}}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Changed Type",{"Column1"})
+				in
+				    #"Removed Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

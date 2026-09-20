@@ -1,0 +1,90 @@
+table fact_reviews
+	lineageTag: 42b17917-3432-4856-ab03-9b63bb4484eb
+
+	column review_id
+		dataType: string
+		lineageTag: 2e4f1492-5982-49bb-8525-fad4846c5ae3
+		summarizeBy: none
+		sourceColumn: review_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column order_id
+		dataType: string
+		lineageTag: 0d2c7c02-3451-425b-926e-ea603b0643a5
+		summarizeBy: none
+		sourceColumn: order_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column review_score
+		dataType: int64
+		formatString: 0
+		lineageTag: 94809ac4-87a4-4b55-a37f-d11251a70afa
+		summarizeBy: sum
+		sourceColumn: review_score
+
+		annotation SummarizationSetBy = Automatic
+
+	column review_comment_title
+		dataType: string
+		lineageTag: 62f5656c-4cfb-442d-bfd1-cc492fb48932
+		summarizeBy: none
+		sourceColumn: review_comment_title
+
+		annotation SummarizationSetBy = Automatic
+
+	column review_comment_message
+		dataType: string
+		lineageTag: b725d17d-736b-4e26-aa39-7c91a65e9c9c
+		summarizeBy: none
+		sourceColumn: review_comment_message
+
+		annotation SummarizationSetBy = Automatic
+
+	column review_creation_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: dfc14154-a658-4e03-a4da-a481b634645b
+		summarizeBy: none
+		sourceColumn: review_creation_date
+
+		variation Variation
+			isDefault
+			relationship: c08ed535-5d64-430a-945e-81799039a47a
+			defaultHierarchy: LocalDateTable_eb2e1fc8-4e7e-41fe-9af9-2db0d0d6bce4.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column review_answer_timestamp
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 7b6cebdc-b00d-46fe-858d-4583f807eb5a
+		summarizeBy: none
+		sourceColumn: review_answer_timestamp
+
+		variation Variation
+			isDefault
+			relationship: 87fb3fe6-f16f-4ffd-81cc-d84272014bc6
+			defaultHierarchy: LocalDateTable_1c14fcdb-845a-40b3-bc58-292e46d0b082.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	partition fact_reviews = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost", "olist_analytics"),
+				    public_order_reviews = Source{[Schema="public",Item="order_reviews"]}[Data],
+				    #"Changed Type" = Table.TransformColumnTypes(public_order_reviews,{{"review_creation_date", type date}, {"review_answer_timestamp", type date}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

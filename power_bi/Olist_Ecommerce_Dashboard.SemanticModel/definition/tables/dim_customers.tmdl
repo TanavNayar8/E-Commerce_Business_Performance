@@ -1,0 +1,56 @@
+table dim_customers
+	lineageTag: c3e931fd-c463-4696-ac22-5d5928d7917c
+
+	column customer_id
+		dataType: string
+		lineageTag: d00be315-5e13-4362-9402-3773cd38eba8
+		summarizeBy: none
+		sourceColumn: customer_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column customer_unique_id
+		dataType: string
+		lineageTag: 05be7a44-4cde-4484-a723-f7e4aa93e2f7
+		summarizeBy: none
+		sourceColumn: customer_unique_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column customer_zip_code_prefix
+		dataType: string
+		lineageTag: 44298721-0c37-40b7-9dbb-7561115b527f
+		summarizeBy: none
+		sourceColumn: customer_zip_code_prefix
+
+		annotation SummarizationSetBy = Automatic
+
+	column customer_city
+		dataType: string
+		lineageTag: 34d6df81-97cd-4ac1-8ec0-29e02423e48e
+		summarizeBy: none
+		sourceColumn: customer_city
+
+		annotation SummarizationSetBy = Automatic
+
+	column customer_state
+		dataType: string
+		lineageTag: ae020098-ea0c-4427-920c-d225481b69f4
+		summarizeBy: none
+		sourceColumn: customer_state
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_customers = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost", "olist_analytics"),
+				    public_customers = Source{[Schema="public",Item="customers"]}[Data]
+				in
+				    public_customers
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

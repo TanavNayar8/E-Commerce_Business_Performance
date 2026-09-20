@@ -1,0 +1,86 @@
+table fact_order_items
+	lineageTag: 94bb345a-faa5-4e0f-9bd9-de02475f6690
+
+	column order_id
+		dataType: string
+		lineageTag: 6e9b8e75-a86a-4fc6-9975-1803836369bf
+		summarizeBy: none
+		sourceColumn: order_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column order_item_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 254c335e-9816-41d7-a3ab-fbba931962c9
+		summarizeBy: sum
+		sourceColumn: order_item_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column product_id
+		dataType: string
+		lineageTag: 2794ce3e-46e1-43e2-b97c-d767ba525e96
+		summarizeBy: none
+		sourceColumn: product_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column seller_id
+		dataType: string
+		lineageTag: 5ad12517-cbf1-4b56-b430-09c444ba94d8
+		summarizeBy: none
+		sourceColumn: seller_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column shipping_limit_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 7f7fa418-a8bf-41d9-8402-d502b9c1e206
+		summarizeBy: none
+		sourceColumn: shipping_limit_date
+
+		variation Variation
+			isDefault
+			relationship: b7f081ae-9bf1-4da5-975d-c7d9eecc09e4
+			defaultHierarchy: LocalDateTable_d7f1287a-8136-40f0-8d3b-5f2f79ac8297.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column price
+		dataType: double
+		lineageTag: 8180e825-f6bf-4b16-b543-cb24f70a5b73
+		summarizeBy: sum
+		sourceColumn: price
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column freight_value
+		dataType: double
+		lineageTag: 6927e351-3ec2-4503-8403-de4f72cac6a8
+		summarizeBy: sum
+		sourceColumn: freight_value
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition fact_order_items = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost", "olist_analytics"),
+				    public_order_items = Source{[Schema="public",Item="order_items"]}[Data],
+				    #"Changed Type" = Table.TransformColumnTypes(public_order_items,{{"shipping_limit_date", type date}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,99 @@
+table Dim_Date
+	lineageTag: cc342ac4-b648-4bc2-a3c5-1a94a1ec43ce
+
+	column Date
+		formatString: Long Date
+		lineageTag: 1bd5bb85-e329-4e01-bf24-cf8cf46706df
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Date]
+
+		variation Variation
+			isDefault
+			relationship: fd7a1cb0-994e-4785-9613-b305b4c7b093
+			defaultHierarchy: LocalDateTable_b018663e-f7dc-4fad-9801-6ebe8042065f.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Year
+		formatString: 0
+		lineageTag: 0c041526-7543-43d8-976a-79cbfd490c36
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Year]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month Number'
+		formatString: 0
+		lineageTag: 979541aa-1c77-461f-801e-ba4f21b77e1a
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Month Number]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month Name'
+		lineageTag: e02ff3bd-5e36-4de8-a5d8-701a373af143
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Month Name]
+		sortByColumn: 'Month Number'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Year Month'
+		lineageTag: d0f4976e-468d-4f22-b171-d01cb9cf118f
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Year Month]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quarter
+		lineageTag: 8a990d3a-78c3-4f3c-bb22-b8c834dae4bb
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Quarter]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Day of Week'
+		formatString: 0
+		lineageTag: c3ba0f26-8b64-42f3-94a4-7a9685a3a5d8
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Day of Week]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Day Name'
+		lineageTag: d0618c5e-d9d0-4838-a757-996973b09555
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Day Name]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Dim_Date = calculated
+		mode: import
+		source =
+				
+				VAR MinDate = DATE(YEAR(MIN(Fact_Orders[order_purchase_timestamp])), 1, 1)
+				VAR MaxDate = DATE(YEAR(MAX(Fact_Orders[order_purchase_timestamp])), 12, 31)
+				RETURN
+				ADDCOLUMNS (
+				    CALENDAR (MinDate, MaxDate),
+				    "Year", YEAR([Date]),
+				    "Month Number", MONTH([Date]),
+				    "Month Name", FORMAT([Date], "MMM"),
+				    "Year Month", FORMAT([Date], "YYYY-MM"),
+				    "Quarter", "Q" & FORMAT([Date], "Q"),
+				    "Day of Week", WEEKDAY([Date], 2),
+				    "Day Name", FORMAT([Date], "DDD")
+				)
+
+	annotation PBI_Id = e5661112e164459a8456bcb449392df4
+

@@ -1,0 +1,60 @@
+table fact_payments
+	lineageTag: d874cd60-3725-4b36-ab94-e408bd431b97
+
+	column order_id
+		dataType: string
+		lineageTag: 9469ded1-5380-45db-8551-3ff4d7239511
+		summarizeBy: none
+		sourceColumn: order_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column payment_sequential
+		dataType: int64
+		formatString: 0
+		lineageTag: 7d0f6180-3478-44fc-8f47-1f47aa2d30e9
+		summarizeBy: sum
+		sourceColumn: payment_sequential
+
+		annotation SummarizationSetBy = Automatic
+
+	column payment_type
+		dataType: string
+		lineageTag: 70e552aa-cb28-4b44-bacb-e9952a9a261b
+		summarizeBy: none
+		sourceColumn: payment_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column payment_installments
+		dataType: int64
+		formatString: 0
+		lineageTag: cdf7503b-63e5-4927-8230-c35c5ff7bbbd
+		summarizeBy: sum
+		sourceColumn: payment_installments
+
+		annotation SummarizationSetBy = Automatic
+
+	column payment_value
+		dataType: double
+		lineageTag: 97540df1-6a9c-4622-be3c-85a7384b0e60
+		summarizeBy: sum
+		sourceColumn: payment_value
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition fact_payments = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost", "olist_analytics"),
+				    public_order_payments = Source{[Schema="public",Item="order_payments"]}[Data]
+				in
+				    public_order_payments
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

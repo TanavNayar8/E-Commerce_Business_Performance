@@ -1,0 +1,70 @@
+relationship b7f081ae-9bf1-4da5-975d-c7d9eecc09e4
+	joinOnDateBehavior: datePartOnly
+	fromColumn: fact_order_items.shipping_limit_date
+	toColumn: LocalDateTable_d7f1287a-8136-40f0-8d3b-5f2f79ac8297.Date
+
+relationship c08ed535-5d64-430a-945e-81799039a47a
+	joinOnDateBehavior: datePartOnly
+	fromColumn: fact_reviews.review_creation_date
+	toColumn: LocalDateTable_eb2e1fc8-4e7e-41fe-9af9-2db0d0d6bce4.Date
+
+relationship 87fb3fe6-f16f-4ffd-81cc-d84272014bc6
+	joinOnDateBehavior: datePartOnly
+	fromColumn: fact_reviews.review_answer_timestamp
+	toColumn: LocalDateTable_1c14fcdb-845a-40b3-bc58-292e46d0b082.Date
+
+relationship 6854698c-e2c7-4e43-bba9-719198628140
+	joinOnDateBehavior: datePartOnly
+	fromColumn: fact_orders.order_approved_at
+	toColumn: LocalDateTable_202740a2-9260-4260-9814-17d24466a9c9.Date
+
+relationship b6a160a4-0747-4954-a964-00016136099b
+	joinOnDateBehavior: datePartOnly
+	fromColumn: fact_orders.order_delivered_carrier_date
+	toColumn: LocalDateTable_f4d23adc-e794-445f-bad1-4877b831c10c.Date
+
+relationship 82c7df79-070a-4b22-8f43-9c91799861e7
+	joinOnDateBehavior: datePartOnly
+	fromColumn: fact_orders.order_delivered_customer_date
+	toColumn: LocalDateTable_7ecb152e-a620-47f9-8cf4-2d4fac99160c.Date
+
+relationship 07a322c3-7f07-435a-bc9f-3170422f1dcb
+	joinOnDateBehavior: datePartOnly
+	fromColumn: fact_orders.order_estimated_delivery_date
+	toColumn: LocalDateTable_f2d8ca2e-8714-4399-87a6-86bf7f64746e.Date
+
+relationship AutoDetected_a712db93-8913-42be-b633-282a90529cfc
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: fact_orders.customer_id
+	toColumn: dim_customers.customer_id
+
+relationship AutoDetected_2abaf5f9-ffa0-49ac-97f2-8a9b4c95a5d1
+	fromColumn: fact_order_items.order_id
+	toColumn: fact_orders.order_id
+
+relationship AutoDetected_d0f5a08f-5c54-447d-af7d-32ec9934f53a
+	fromColumn: fact_payments.order_id
+	toColumn: fact_orders.order_id
+
+relationship AutoDetected_e1afe247-3de2-4f79-bf67-6f682e85bcdd
+	fromColumn: fact_reviews.order_id
+	toColumn: fact_orders.order_id
+
+relationship AutoDetected_8f413171-9b12-41bf-8c2b-dfbfdcd3f7d2
+	fromColumn: fact_order_items.product_id
+	toColumn: dim_Products.product_id
+
+relationship AutoDetected_2fef9466-c1a2-4eab-b4b3-b8dcb8ab85ad
+	fromColumn: fact_order_items.seller_id
+	toColumn: dim_sellers.seller_id
+
+relationship fd7a1cb0-994e-4785-9613-b305b4c7b093
+	joinOnDateBehavior: datePartOnly
+	fromColumn: Dim_Date.Date
+	toColumn: LocalDateTable_b018663e-f7dc-4fad-9801-6ebe8042065f.Date
+
+relationship 53bdab36-63de-dad9-3368-eeb83ad46082
+	fromColumn: fact_orders.order_purchase_timestamp
+	toColumn: Dim_Date.Date
+

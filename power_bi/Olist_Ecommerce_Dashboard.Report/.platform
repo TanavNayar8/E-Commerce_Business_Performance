@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Olist_Ecommerce_Dashboard"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "9c5019ac-42c7-4c90-9e26-fcc2810d59c9"
+  }
+}

@@ -1,0 +1,48 @@
+table dim_sellers
+	lineageTag: 3034aaea-3866-4fad-bb67-b5fadb12f8cc
+
+	column seller_id
+		dataType: string
+		lineageTag: c615fe44-497b-4bba-b0ec-e3f20698c306
+		summarizeBy: none
+		sourceColumn: seller_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column seller_zip_code_prefix
+		dataType: string
+		lineageTag: d74d4192-a694-46a4-ad43-00d41fba53f8
+		summarizeBy: none
+		sourceColumn: seller_zip_code_prefix
+
+		annotation SummarizationSetBy = Automatic
+
+	column seller_city
+		dataType: string
+		lineageTag: cb7b4171-7ea9-4622-a088-bf4649d384c6
+		summarizeBy: none
+		sourceColumn: seller_city
+
+		annotation SummarizationSetBy = Automatic
+
+	column seller_state
+		dataType: string
+		lineageTag: e460272a-db63-4a86-9499-0c957b002122
+		summarizeBy: none
+		sourceColumn: seller_state
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_sellers = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost", "olist_analytics"),
+				    public_sellers = Source{[Schema="public",Item="sellers"]}[Data]
+				in
+				    public_sellers
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
