@@ -36,22 +36,23 @@ olist-ecommerce-sales-analysis/
     ├── 02_Product_Category.png
     ├── 03_Customer_Analytics.png
     └── 04_Operations_Seller.png
+```
 
-Dashboard Preview
+## Dashboard Preview
 
-Executive Performance
+### Executive Performance
 
 ![Executive Performance Dashboard](Screenshots/01_Executive_Performance.png)
 
-Product & Category Analytics
+### Product & Category Analytics
 
 ![Product and Category Dashboard](Screenshots/02_Product_Category.png)
 
- Customer Analytics
+ ### Customer Analytics
 
 ![Customer Analytics Dashboard](Screenshots/03_Customer_Analytics.png)
 
- Operations & Seller Experience
+ ### Operations & Seller Experience
 
 ![Operations and Seller Dashboard](Screenshots/04_Operations_Seller.png)
 
