@@ -409,6 +409,7 @@ ORDER BY order_month;
 
 
 -- Regional logistics inefficiency: freight burden ratio by state
+
 WITH StateCosts AS (
     SELECT 
         c.customer_state,
